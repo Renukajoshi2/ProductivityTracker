@@ -3,13 +3,13 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from ..db import get_db
 from ..models import UserCreate, UserOut
-from ..security import hash_password, require_lead
+from ..security import get_current_user, hash_password, require_lead
 
 router = APIRouter(prefix="/users", tags=["users"])
 
 
 @router.get("", response_model=list[UserOut])
-async def list_users(_: dict = Depends(require_lead)):
+async def list_users(_: dict = Depends(get_current_user)):
     users = await get_db().users.find({}).to_list(length=500)
     return [
         UserOut(
@@ -18,6 +18,7 @@ async def list_users(_: dict = Depends(require_lead)):
             email=u["email"],
             role=u["role"],
             active=u.get("active", True),
+            ooo=u.get("ooo", False),
         )
         for u in users
     ]
@@ -53,3 +54,14 @@ async def set_active(
         {"_id": ObjectId(user_id)}, {"$set": {"active": active}}
     )
     return {"ok": True}
+
+
+@router.put("/{user_id}/ooo")
+async def set_ooo(
+    user_id: str, ooo: bool, _: dict = Depends(get_current_user)
+):
+    await get_db().users.update_one(
+        {"_id": ObjectId(user_id)}, {"$set": {"ooo": ooo}}
+    )
+    return {"ok": True}
+

@@ -34,17 +34,17 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center">
       <form
         onSubmit={submit}
-        className="bg-slate-800 p-8 rounded-xl w-96 space-y-4"
+        className="bg-[#141b18] border border-[#1e2b25] p-8 rounded-xl w-96 space-y-4"
       >
         <h1 className="text-2xl font-semibold">Productivity Tracker</h1>
-        <p className="text-sm text-slate-400">Sign in to continue</p>
+        <p className="text-sm text-[#8aa89a]">Sign in to continue</p>
         {err && (
           <div className="bg-red-900/50 text-red-200 text-sm p-2 rounded">
             {err}
           </div>
         )}
         <input
-          className="w-full p-2 rounded bg-slate-700 outline-none"
+          className="w-full p-2 rounded bg-[#1a2420] border border-[#1e2b25] outline-none focus:border-emerald-600"
           placeholder="Email"
           type="email"
           value={email}
@@ -52,7 +52,7 @@ export default function LoginPage() {
           required
         />
         <input
-          className="w-full p-2 rounded bg-slate-700 outline-none"
+          className="w-full p-2 rounded bg-[#1a2420] border border-[#1e2b25] outline-none focus:border-emerald-600"
           placeholder="Password"
           type="password"
           value={password}
@@ -61,11 +61,11 @@ export default function LoginPage() {
         />
         <button
           disabled={loading}
-          className="w-full bg-indigo-600 hover:bg-indigo-500 p-2 rounded font-medium disabled:opacity-50"
+          className="w-full bg-emerald-600 hover:bg-emerald-500 p-2 rounded font-medium disabled:opacity-50"
         >
           {loading ? "Signing in..." : "Sign in"}
         </button>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-[#5a7a6a]">
           No account? Ask your admin to create one.
         </p>
       </form>

@@ -25,6 +25,7 @@ class UserOut(BaseModel):
     email: EmailStr
     role: Role
     active: bool = True
+    ooo: bool = False
 
 
 class UserCreate(BaseModel):

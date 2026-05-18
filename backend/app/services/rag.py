@@ -1,38 +1,33 @@
 """Lightweight RAG over EOD reports / chat messages.
 
-Embeddings are stored in the `embeddings` collection. Retrieval is an
-in-process cosine similarity scan — fine for a 20-person team's volume,
-and avoids requiring a vector DB on an office laptop.
+Embeddings are generated locally using sentence-transformers (no API key needed).
+Stored in the `embeddings` collection; retrieval uses in-process cosine similarity.
 """
 from datetime import datetime, timezone
 
 import numpy as np
-from openai import AsyncOpenAI
 
-from ..config import settings
 from ..db import get_db
 
-_client: AsyncOpenAI | None = None
+_model = None
 
 
-def _openai() -> AsyncOpenAI:
-    global _client
-    if _client is None:
-        _client = AsyncOpenAI(api_key=settings.openai_api_key)
-    return _client
+def _get_model():
+    global _model
+    if _model is None:
+        from sentence_transformers import SentenceTransformer
+        _model = SentenceTransformer("all-MiniLM-L6-v2")
+    return _model
 
 
-async def embed(text: str) -> list[float]:
-    resp = await _openai().embeddings.create(
-        model=settings.openai_embed_model, input=text[:8000]
-    )
-    return resp.data[0].embedding
+def embed(text: str) -> list[float]:
+    return _get_model().encode(text[:8000], normalize_embeddings=True).tolist()
 
 
 async def index_text(source: str, ref_id: str, user_name: str, text: str):
     """Store an embedding for later retrieval (best-effort)."""
     try:
-        vec = await embed(text)
+        vec = embed(text)
     except Exception:
         return
     await get_db().embeddings.insert_one(
@@ -49,7 +44,7 @@ async def index_text(source: str, ref_id: str, user_name: str, text: str):
 
 async def retrieve(query: str, k: int = 5) -> list[dict]:
     try:
-        qv = np.array(await embed(query), dtype=np.float32)
+        qv = np.array(embed(query), dtype=np.float32)
     except Exception:
         return []
     docs = await get_db().embeddings.find({}).to_list(length=2000)
